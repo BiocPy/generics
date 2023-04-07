@@ -4,6 +4,6 @@ __license__ = "MIT"
 
 
 def test_import():
-    from bioc_generics.MetadataMixin import MetadataMixin
+    from biocgenerics.MetadataMixin import MetadataMixin
 
     assert MetadataMixin is not None
