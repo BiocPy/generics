@@ -1,0 +1,21 @@
+bioc\_generics package
+======================
+
+Submodules
+----------
+
+bioc\_generics.MetadataMixin module
+-----------------------------------
+
+.. automodule:: bioc_generics.MetadataMixin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: bioc_generics
+   :members:
+   :undoc-members:
+   :show-inheritance:

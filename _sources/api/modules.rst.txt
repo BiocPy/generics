@@ -1,0 +1,7 @@
+bioc_generics
+=============
+
+.. toctree::
+   :maxdepth: 4
+
+   bioc_generics
