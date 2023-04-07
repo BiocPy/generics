@@ -1,15 +1,15 @@
-# bioc-generics
+# biocgenerics
 
 > Generics for core data structures across all classes in BiocPy
 
-For now, I don't anticipate users utilizing this package directly. This is meant for developers who want to extend the functionality of BiocPy to support new data structures or experiments.
+I do not expect users to use this package directly at the moment. Developers who want to extend BiocPy's functionality can use this to support new data structures and experiments.
 
 ## Install
 
-Package is published to [PyPI](https://pypi.org/project/bioc-generics/)
+Package is published to [PyPI](https://pypi.org/project/biocgenerics/)
 
 ```shell
-pip install bioc-generics
+pip install biocgenerics
 ```
 
 
