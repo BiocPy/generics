@@ -14,10 +14,17 @@
 
 # bioc-generics
 
-> Add a short description here!
+> Generics for core data structures across all classes in BiocPy
 
-A longer description of your project goes here...
+For now, I don't anticipate users utilizing this package directly. This is meant for developers who want to extend the functionality of BiocPy to support new data structures or experiments.
 
+## Install
+
+Package is published to [PyPI](https://pypi.org/project/bioc-generics/)
+
+```shell
+pip install bioc-generics
+```
 
 <!-- pyscaffold-notes -->
 

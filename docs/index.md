@@ -1,17 +1,16 @@
 # bioc-generics
 
-Add a short description here!
+> Generics for core data structures across all classes in BiocPy
 
+For now, I don't anticipate users utilizing this package directly. This is meant for developers who want to extend the functionality of BiocPy to support new data structures or experiments.
 
-## Note
+## Install
 
-> This is the main page of your project's [Sphinx] documentation. It is
-> formatted in [Markdown]. Add additional pages by creating md-files in
-> `docs` or rst-files (formatted in [reStructuredText]) and adding links to
-> them in the `Contents` section below.
->
-> Please check [Sphinx] and [MyST] for more information
-> about how to document your project and how to configure your preferences.
+Package is published to [PyPI](https://pypi.org/project/bioc-generics/)
+
+```shell
+pip install bioc-generics
+```
 
 
 ## Contents
