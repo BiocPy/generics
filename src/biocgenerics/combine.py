@@ -37,7 +37,7 @@ def combine(*x: Any):
 
     Returns:
         A combined object, typically the same type as the first element in ``x``.
-        A list if any of the objects is a list.
+        A list if one of the objects is a list.
     """
 
     first_object = x[0]
@@ -45,12 +45,14 @@ def combine(*x: Any):
     if hasattr(first_object, "combine"):
         return first_object.combine(*x[1:])
 
-    if is_list_of_type(x, (ndarray, array)):
+    if is_list_of_type(x, ndarray):
+        print("here")
         return concatenate(x)
 
     if is_list_of_type(x, spmatrix):
         return vstack(x)
 
+    print("shouldn't get this far")
     # convert everything to list
     try:
         _all_as_list = [list(m) for m in x]
