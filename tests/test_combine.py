@@ -33,7 +33,7 @@ def test_combine_basic_numpy():
     assert isinstance(zcomb, np.ndarray)
     assert len(zcomb) == len(zd)
 
-def test_combine_basic_sparse():
+def test_combine_basic_mixed_numpy_list():
     x = [1, 2, 3]
     y = [0.1, 0.2]
     xd = np.array([1, 2, 3])
@@ -44,4 +44,17 @@ def test_combine_basic_sparse():
 
     assert zcomb == z
     assert isinstance(zcomb, list)
-    assert len(zd) == len(xd) + len(yd)
+    assert len(zcomb) == len(xd) + len(y)
+
+def test_combine_basic_mixed_tuple_list():
+    x = [1, 2, 3]
+    y = (0.1, 0.2)
+    xd = np.array([1, 2, 3])
+
+    zcomb = combine(xd, y, x)
+
+    z = x + list(y) + x 
+
+    assert zcomb == z
+    assert isinstance(zcomb, list)
+    assert len(zcomb) == 2*len(xd) + len(y)

@@ -1,3 +1,4 @@
+from functools import singledispatch
 from itertools import chain
 from typing import Any
 
@@ -11,6 +12,17 @@ __copyright__ = "jkanche"
 __license__ = "MIT"
 
 
+def _generic_combine(*x: Any):
+    try:
+        _all_as_list = [list(m) for m in x]
+        return list(chain(*_all_as_list))
+    except Exception as e:
+        raise NotImplementedError(
+            "`combine` method is not implement for objects."
+        ) from e
+
+
+@singledispatch
 def combine(*x: Any):
     """Combine vector-like objects.
 
@@ -45,19 +57,20 @@ def combine(*x: Any):
     if hasattr(first_object, "combine"):
         return first_object.combine(*x[1:])
 
+    return _generic_combine(*x)
+
+
+@combine.register(ndarray)
+def _combine(*x: ndarray):
     if is_list_of_type(x, ndarray):
-        print("here")
         return concatenate(x)
 
+    return _generic_combine(*x)
+
+
+@combine.register(spmatrix)
+def _combine(*x: spmatrix):
     if is_list_of_type(x, spmatrix):
         return vstack(x)
 
-    print("shouldn't get this far")
-    # convert everything to list
-    try:
-        _all_as_list = [list(m) for m in x]
-        return list(chain(*_all_as_list))
-    except Exception as e:
-        raise NotImplementedError(
-            "`combine` method is not implement for objects."
-        ) from e
+    return _generic_combine(*x)
