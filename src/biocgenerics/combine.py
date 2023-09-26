@@ -26,6 +26,8 @@ def _generic_combine(*x: Any):
 def combine(*x: Any):
     """Combine vector-like objects.
 
+    Custom classes may implement the ``combine`` method.
+
     If the first element in ``x`` contains a ``combine`` method,
     the rest of the arguments are passed to that function.
 
@@ -61,7 +63,7 @@ def combine(*x: Any):
 
 
 @combine.register(ndarray)
-def _combine(*x: ndarray):
+def _combine_numpy(*x: ndarray):
     if is_list_of_type(x, ndarray):
         return concatenate(x)
 
@@ -69,7 +71,7 @@ def _combine(*x: ndarray):
 
 
 @combine.register(spmatrix)
-def _combine(*x: spmatrix):
+def _combine_scipy(*x: spmatrix):
     if is_list_of_type(x, spmatrix):
         return vstack(x)
 
