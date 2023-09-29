@@ -2,8 +2,8 @@ from functools import singledispatch
 from itertools import chain
 from typing import Any
 
-from numpy import array, concatenate, ndarray
-from scipy.sparse import spmatrix, vstack
+from numpy import concatenate, ndarray
+from scipy.sparse import sparray, hstack
 
 from .utils import is_list_of_type
 
@@ -36,7 +36,7 @@ def combine(*x: Any):
     :py:func:`~numpy.concatenate`.
 
     If all objects are a :py:class:`~scipy.sparse.spmatrix`,
-    these objects are combined using scipy's :py:class:`~scipy.sparse.vstack`.
+    these objects are combined using scipy's :py:class:`~scipy.sparse.hstack`.
 
     For all other scenario's, all objects are coerced to alist and combined.
 
@@ -63,16 +63,16 @@ def combine(*x: Any):
 
 
 @combine.register(ndarray)
-def _combine_numpy(*x: ndarray):
+def _combine_dense_arrays(*x: ndarray):
     if is_list_of_type(x, ndarray):
         return concatenate(x)
 
     return _generic_combine(*x)
 
 
-@combine.register(spmatrix)
-def _combine_scipy(*x: spmatrix):
-    if is_list_of_type(x, spmatrix):
-        return vstack(x)
+@combine.register(sparray)
+def _combine_sparse_arrays(*x: sparray):
+    if is_list_of_type(x, sparray):
+        return hstack(x)
 
     return _generic_combine(*x)

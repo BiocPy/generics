@@ -12,20 +12,20 @@ __license__ = "MIT"
 
 
 @singledispatch
-def combine_rows(*x: Any):
+def combine_cols(*x: Any):
     """Combine 2-dimensional objects by row.
 
-    If the first element in ``x`` contains a ``combine_rows`` method,
+    If the first element in ``x`` contains a ``combine_cols`` method,
     the rest of the arguments are passed to that function.
 
     If all objects are :py:class:`~numpy.ndarray`, we use the
-    :py:func:`~numpy.vstack` to combine dense matrices by row.
+    :py:func:`~numpy.hstack` to combine dense matrices by row.
 
     If all objects are :py:class:`~scipy.sparse.spmatrix`, we use the
-    :py:func:`~scipy.sparse.vstack` to combine sparse matrices by row.
+    :py:func:`~scipy.sparse.hstack` to combine sparse matrices by row.
 
     If the objects are a mix of sparse and dense matrices, we use the
-    :py:func:`~scipy.sparse.vstack` function.
+    :py:func:`~scipy.sparse.hstack` function.
 
     Args:
         x (Any): Array of vector-like objects to combine.
@@ -46,33 +46,33 @@ def combine_rows(*x: Any):
 
     first_object = x[0]
 
-    if hasattr(first_object, "combine_rows"):
-        return first_object.combine_rows(*x[1:])
+    if hasattr(first_object, "combine_cols"):
+        return first_object.combine_cols(*x[1:])
 
-    raise NotImplementedError("`combine_rows` method is not implement for objects.")
-
-
-def _generic_numpy_scipy_combine_rows(*x: Any):
-    from scipy.sparse import vstack
-
-    return vstack(x)
+    raise NotImplementedError("`combine_cols` method is not implement for objects.")
 
 
-@combine_rows.register(ndarray)
-def _combine_rows_dense(*x: ndarray):
+def _generic_numpy_scipy_combine_cols(*x: Any):
+    from scipy.sparse import hstack
+
+    return hstack(x)
+
+
+@combine_cols.register(ndarray)
+def _combine_cols_dense(*x: ndarray):
     if is_list_of_type(x, ndarray):
-        from numpy import vstack
+        from numpy import hstack
 
-        return vstack(x)
+        return hstack(x)
 
-    return _generic_numpy_scipy_combine_rows(*x)
+    return _generic_numpy_scipy_combine_cols(*x)
 
 
-@combine_rows.register(spmatrix)
-def _combine_rows_sparse(*x: spmatrix):
+@combine_cols.register(spmatrix)
+def _combine_cols_sparse(*x: spmatrix):
     if is_list_of_type(x, spmatrix):
-        from scipy.sparse import vstack
+        from scipy.sparse import hstack
 
-        return vstack(x)
+        return hstack(x)
 
-    return _generic_numpy_scipy_combine_rows(*x)
+    return _generic_numpy_scipy_combine_cols(*x)
