@@ -14,3 +14,9 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 finally:
     del version, PackageNotFoundError
+
+from .colnames import colnames, set_colnames
+from .rownames import rownames, set_rownames
+from .combine import combine
+from .combine_cols import combine_cols
+from .combine_rows import combine_rows

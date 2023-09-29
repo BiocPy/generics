@@ -6,7 +6,8 @@ __license__ = "MIT"
 
 
 def is_list_of_type(x: Any, target_type) -> bool:
-    """Checks if ``x`` is a list, and whether all elements of the list are of the same type.
+    """Checks if ``x`` is a list, and whether all elements of the list are of
+    the same type.
 
     Args:
         x (Any): Any list-like object.
