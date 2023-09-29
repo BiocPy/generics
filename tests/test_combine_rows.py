@@ -30,12 +30,12 @@ def test_combine_rows_sparse():
     assert z.shape == (30, 20)
 
 
-# def test_combine_rows_mixed():
-#     num_cols = 20
-#     x = np.ones(shape=(10, num_cols))
-#     y = sp.identity(num_cols)
+def test_combine_rows_mixed():
+    num_cols = 20
+    x = np.ones(shape=(10, num_cols))
+    y = sp.identity(num_cols)
 
-#     z = combine(x, y)
+    z = combine_rows(x, y)
 
-#     assert isinstance(z, sp.spmatrix)
-#     assert z.shape == (30, 20)
+    assert isinstance(z, sp.spmatrix)
+    assert z.shape == (30, 20)
