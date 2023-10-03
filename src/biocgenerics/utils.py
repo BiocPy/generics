@@ -20,3 +20,13 @@ def is_list_of_type(x: Any, target_type) -> bool:
     return isinstance(x, (list, tuple)) and all(
         [isinstance(item, target_type) for item in x]
     )
+
+
+def convert_sparse_to_dense(x):
+    elem = x.toarray()
+
+    # If it's a single dimension sparse array
+    if elem.shape[0] == 1:
+        elem = elem[0]
+
+    return elem
