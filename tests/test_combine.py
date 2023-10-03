@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from biocgenerics.combine import combine
 from scipy import sparse as sp
 
@@ -83,6 +84,7 @@ def test_basic_sparse():
     assert isinstance(z, sp.spmatrix)
     assert z.shape[1] == len(x) + len(y)
 
+
 def test_mixed_sparse_list():
     x = [1, 2, 3]
     y = [0.1, 0.2]
@@ -94,6 +96,7 @@ def test_mixed_sparse_list():
     assert isinstance(zcomb, list)
     assert len(zcomb) == len(xd) + len(y)
 
+
 def test_mixed_sparse_dense():
     x = np.array([1, 2, 3])
     y = np.array([0.1, 0.2])
@@ -104,3 +107,31 @@ def test_mixed_sparse_dense():
 
     assert isinstance(z, np.ndarray)
     assert z.shape[0] == len(x) + len(y)
+
+
+def test_pandas_series():
+    s1 = pd.Series(["a", "b"])
+    s2 = pd.Series(["c", "d"])
+
+    z = combine(s1, s2)
+
+    assert isinstance(z, pd.Series)
+    assert len(z) == 4
+
+    x = ["gg", "ff"]
+
+    z = combine(s1, x)
+    assert isinstance(z, pd.Series)
+    assert len(z) == 4
+
+
+def test_pandas_dataframe():
+    df1 = pd.DataFrame([["a", 1], ["b", 2]], columns=["letter", "number"])
+
+    df2 = pd.DataFrame(
+        [["c", 3, "cat"], ["d", 4, "dog"]], columns=["letter", "number", "animal"]
+    )
+
+    z = combine(df1, df2)
+
+    assert isinstance(z, pd.DataFrame)

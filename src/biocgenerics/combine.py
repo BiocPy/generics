@@ -4,7 +4,8 @@ from typing import Any
 from warnings import warn
 
 from numpy import concatenate, ndarray
-from .utils import is_list_of_type, convert_sparse_to_dense
+
+from .utils import convert_sparse_to_dense, is_list_of_type
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -40,6 +41,10 @@ def combine(*x: Any):
     If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray`
     is returned.
 
+    If all elements are either :py:class:`~pandas.Series` or
+    :py:class:`~pandas.DataFrame` objects, they are combined using
+    :py:func:`~pandas.concat`.
+
     For all other scenario's, all elements are coerced to a :py:class:`~list` and
     combined.
 
@@ -61,7 +66,7 @@ def combine(*x: Any):
     if hasattr(first_object, "combine"):
         return first_object.combine(*x[1:])
 
-    raise NotImplementedError("`combine` method is not implement for objects.")
+    raise NotImplementedError("`combine` method is not implemented for objects.")
 
 
 def _generic_dense_sparse_combine(x):
@@ -139,5 +144,48 @@ try:
 
     combine.register(sp.sparray, _combine_sparse_arrays)
     combine.register(sp.spmatrix, _combine_sparse_arrays)
+except Exception:
+    pass
+
+
+try:
+    import pandas as pd
+
+    def _combine_pandas_series(*x):
+        if is_list_of_type(x, pd.Series):
+            return pd.concat(x)
+
+        # not everything is a Series
+        if any([isinstance(y, list) for y in x]) is True:
+            elems = []
+            for elem in x:
+                if isinstance(elem, list):
+                    elems.append(pd.Series(elem))
+                else:
+                    elems.append(elem)
+
+            return pd.concat(elems)
+
+        raise TypeError("All elements must be Pandas Series objects.")
+
+    def _combine_pandas_dataframe(*x):
+        if is_list_of_type(x, pd.DataFrame):
+            return pd.concat(x)
+
+        # not everything is a dataframe
+        if any([isinstance(y, dict) for y in x]) is True:
+            elems = []
+            for elem in x:
+                if isinstance(elem, dict):
+                    elems.append(pd.DataFrame(elem))
+                else:
+                    elems.append(elem)
+
+            return pd.concat(elems)
+
+        raise TypeError("All elements must be Pandas DataFrame objects.")
+
+    combine.register(pd.Series, _combine_pandas_series)
+    combine.register(pd.DataFrame, _combine_pandas_dataframe)
 except Exception:
     pass
