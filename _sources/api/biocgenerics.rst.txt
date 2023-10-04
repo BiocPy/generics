@@ -4,10 +4,50 @@ biocgenerics package
 Submodules
 ----------
 
-biocgenerics.MetadataMixin module
+biocgenerics.colnames module
+----------------------------
+
+.. automodule:: biocgenerics.colnames
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+biocgenerics.combine module
+---------------------------
+
+.. automodule:: biocgenerics.combine
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+biocgenerics.combine\_cols module
 ---------------------------------
 
-.. automodule:: biocgenerics.MetadataMixin
+.. automodule:: biocgenerics.combine_cols
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+biocgenerics.combine\_rows module
+---------------------------------
+
+.. automodule:: biocgenerics.combine_rows
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+biocgenerics.rownames module
+----------------------------
+
+.. automodule:: biocgenerics.rownames
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+biocgenerics.utils module
+-------------------------
+
+.. automodule:: biocgenerics.utils
    :members:
    :undoc-members:
    :show-inheritance:
