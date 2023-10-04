@@ -25,6 +25,17 @@ def rownames(x) -> List[str]:
     raise NotImplementedError(f"`rownames` do not exist for class: '{type(x)}'.")
 
 
+try:
+    from pandas import DataFrame
+
+    @rownames.register(DataFrame)
+    def _rownames_dataframe(x: DataFrame) -> list:
+        return x.index
+
+except Exception:
+    pass
+
+
 @singledispatch
 def set_rownames(x: Any, names: List[str]):
     """Set row names.
@@ -40,3 +51,16 @@ def set_rownames(x: Any, names: List[str]):
         An object with the same type as ``x``.
     """
     raise NotImplementedError(f"Cannot set `rownames` for class: {type(x)}")
+
+
+try:
+    from pandas import DataFrame
+
+    @set_rownames.register(DataFrame)
+    def _set_rownames_dataframe(x: DataFrame, names: List[str]):
+        x.index = names
+
+        return x
+
+except Exception:
+    pass

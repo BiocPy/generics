@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from biocgenerics.combine import combine
 from scipy import sparse as sp
 
@@ -7,7 +8,7 @@ __copyright__ = "jkanche"
 __license__ = "MIT"
 
 
-def test_combine_basic_list():
+def test_basic_list():
     x = [1, 2, "c"]
     y = ["a", "b"]
 
@@ -18,7 +19,7 @@ def test_combine_basic_list():
     assert len(z) == len(x) + len(y)
 
 
-def test_combine_basic_dense():
+def test_basic_dense():
     x = [1, 2, 3]
     y = [0.1, 0.2]
     xd = np.array([1, 2, 3])
@@ -34,7 +35,7 @@ def test_combine_basic_dense():
     assert len(zcomb) == len(zd)
 
 
-def test_combine_basic_mixed_dense_list():
+def test_basic_mixed_dense_list():
     x = [1, 2, 3]
     y = [0.1, 0.2]
     xd = np.array([1, 2, 3])
@@ -48,7 +49,7 @@ def test_combine_basic_mixed_dense_list():
     assert len(zcomb) == len(xd) + len(y)
 
 
-def test_combine_basic_mixed_tuple_list():
+def test_basic_mixed_tuple_list():
     x = [1, 2, 3]
     y = (0.1, 0.2)
     xd = np.array([1, 2, 3])
@@ -62,7 +63,7 @@ def test_combine_basic_mixed_tuple_list():
     assert len(zcomb) == 2 * len(xd) + len(y)
 
 
-def test_combine_basic_sparse():
+def test_basic_sparse():
     x = np.array([1, 2, 3])
     y = np.array([0.1, 0.2])
 
@@ -82,3 +83,43 @@ def test_combine_basic_sparse():
 
     assert isinstance(z, sp.spmatrix)
     assert z.shape[1] == len(x) + len(y)
+
+
+def test_mixed_sparse_list():
+    x = [1, 2, 3]
+    y = [0.1, 0.2]
+    xd = np.array([1, 2, 3])
+    sy = sp.csr_array(y)
+
+    zcomb = combine(sy, x)
+
+    assert isinstance(zcomb, list)
+    assert len(zcomb) == len(xd) + len(y)
+
+
+def test_mixed_sparse_dense():
+    x = np.array([1, 2, 3])
+    y = np.array([0.1, 0.2])
+
+    sy = sp.csr_array(y)
+
+    z = combine(x, sy)
+
+    assert isinstance(z, np.ndarray)
+    assert z.shape[0] == len(x) + len(y)
+
+
+def test_pandas_series():
+    s1 = pd.Series(["a", "b"])
+    s2 = pd.Series(["c", "d"])
+
+    z = combine(s1, s2)
+
+    assert isinstance(z, pd.Series)
+    assert len(z) == 4
+
+    x = ["gg", "ff"]
+
+    z = combine(s1, x)
+    assert isinstance(z, pd.Series)
+    assert len(z) == 4
