@@ -29,16 +29,10 @@ def combine_rows(*x: Any):
 
     If all elements are either 2-dimensional :py:class:`~scipy.sparse.spmatrix` or
     :py:class:`~scipy.sparse.sparray`, these objects are combined
-    using scipy's :py:class:`~scipy.sparse.hstack`.
+    using scipy's :py:class:`~scipy.sparse.vstack`.
 
-    If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray`
-    is returned.
-
-    If all elements are :py:class:`~pandas.Series` objects, they are combined using
-    :py:func:`~pandas.concat`.
-
-    For all other scenario's, all elements are coerced to a :py:class:`~list` and
-    combined.
+    If all elements are :py:class:`~pandas.DataFrame` objects, they are combined using
+    :py:func:`~pandas.concat` along the first axis.
 
     Args:
         x (Any): Array of 2-dimensional objects to combine.
@@ -46,12 +40,10 @@ def combine_rows(*x: Any):
             All elements of x are expected to be the same class or
             atleast compatible with each other.
 
-    Raises:
-        TypeError: If any object in the list cannot be coerced to a list.
-
     Returns:
         A combined object, typically the same type as the first element in ``x``.
-        A list if one of the objects is a list.
+        If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray`
+        is returned.
     """
 
     first_object = x[0]
