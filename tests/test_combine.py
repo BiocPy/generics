@@ -123,4 +123,3 @@ def test_pandas_series():
     z = combine(s1, x)
     assert isinstance(z, pd.Series)
     assert len(z) == 4
-
