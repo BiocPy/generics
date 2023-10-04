@@ -1,10 +1,14 @@
 from functools import singledispatch
 from typing import Any
+from warnings import warn
 
-from numpy import ndarray
-from scipy.sparse import spmatrix
+from numpy import hstack, ndarray
 
-from .utils import is_list_of_type
+from .utils import (
+    _convert_sparse_to_dense,
+    _do_arrays_match,
+    is_list_of_type,
+)
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -13,22 +17,31 @@ __license__ = "MIT"
 
 @singledispatch
 def combine_cols(*x: Any):
-    """Combine 2-dimensional objects by row.
+    """Combine 2-dimensional objects.
+
+    Custom classes may implement their own ``combine_cols`` method.
 
     If the first element in ``x`` contains a ``combine_cols`` method,
-    the rest of the arguments are passed to that function.
+    the rest of the arguments are passed to that method.
 
-    If all objects are :py:class:`~numpy.ndarray`, we use the
-    :py:func:`~numpy.hstack` to combine dense matrices by row.
+    If all elements are 2-dimensional :py:class:`~numpy.ndarray`,
+    we combine them using numpy's :py:func:`~numpy.concatenate`.
 
-    If all objects are :py:class:`~scipy.sparse.spmatrix`, we use the
-    :py:func:`~scipy.sparse.hstack` to combine sparse matrices by row.
+    If all elements are either 2-dimensional :py:class:`~scipy.sparse.spmatrix` or
+    :py:class:`~scipy.sparse.sparray`, these objects are combined
+    using scipy's :py:class:`~scipy.sparse.hstack`.
 
-    If the objects are a mix of sparse and dense matrices, we use the
-    :py:func:`~scipy.sparse.hstack` function.
+    If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray`
+    is returned.
+
+    If all elements are :py:class:`~pandas.Series` objects, they are combined using
+    :py:func:`~pandas.concat`.
+
+    For all other scenario's, all elements are coerced to a :py:class:`~list` and
+    combined.
 
     Args:
-        x (Any): Array of vector-like objects to combine.
+        x (Any): Array of 2-dimensional objects to combine.
 
             All elements of x are expected to be the same class or
             atleast compatible with each other.
@@ -37,42 +50,108 @@ def combine_cols(*x: Any):
         TypeError: If any object in the list cannot be coerced to a list.
 
     Returns:
-        A combined matrix, typically the same type as the first element in ``x``.
-        A :py:class:`~numpy.ndarray` if all elements are dense matrices.
-        A :py:class:`~scipy.sparse.spmatrix`, if all elements are sparse
-        If elements are a mix of dense and sparse, returns a
-        :py:class:`~scipy.sparse.spmatrix` matrix.
+        A combined object, typically the same type as the first element in ``x``.
+        A list if one of the objects is a list.
     """
 
     first_object = x[0]
-
     if hasattr(first_object, "combine_cols"):
         return first_object.combine_cols(*x[1:])
 
-    raise NotImplementedError("`combine_cols` method is not implement for objects.")
+    raise NotImplementedError("`combine_cols` method is not implemented for objects.")
 
 
-def _generic_numpy_scipy_combine_cols(*x: Any):
-    from scipy.sparse import hstack
+def _generic_combine_cols_dense_sparse(x):
+    elems = []
 
-    return hstack(x)
+    for elem in x:
+        if not isinstance(elem, ndarray):
+            elem = _convert_sparse_to_dense(elem)
+
+        elems.append(elem)
+
+    if _do_arrays_match(elems, 0) is not True:
+        raise ValueError("1st dimension does not match across all elements.")
+
+    return hstack(elems)
 
 
 @combine_cols.register(ndarray)
-def _combine_cols_dense(*x: ndarray):
+def _combine_cols_dense_arrays(*x: ndarray):
     if is_list_of_type(x, ndarray):
-        from numpy import hstack
+        if _do_arrays_match(x, 0) is not True:
+            raise ValueError("1st dimension does not match across all elements.")
 
         return hstack(x)
 
-    return _generic_numpy_scipy_combine_cols(*x)
+    warn("Not all elements are numpy ndarrays.")
+
+    if all([hasattr(y, "shape") for y in x]) is True:
+        # assuming it's a mix of numpy and scipy arrays
+        return _generic_combine_cols_dense_sparse(x)
+
+    raise ValueError("All elements must be 2-dimensional matrices.")
 
 
-@combine_cols.register(spmatrix)
-def _combine_cols_sparse(*x: spmatrix):
-    if is_list_of_type(x, spmatrix):
-        from scipy.sparse import hstack
+try:
+    import scipy.sparse as sp
 
-        return hstack(x)
+    def _combine_cols_sparse_arrays(*x):
+        if is_list_of_type(x, (sp.sparray, sp.spmatrix)):
+            sp_conc = sp.hstack(x)
 
-    return _generic_numpy_scipy_combine_cols(*x)
+            if _do_arrays_match(x, 0) is not True:
+                raise ValueError("1st dimension does not match across all elements.")
+
+            first = x[0]
+            if isinstance(first, (sp.csr_matrix, sp.csr_array)):
+                return sp_conc.tocsr()
+            elif isinstance(first, (sp.csc_matrix, sp.csc_array)):
+                return sp_conc.tocsc()
+            elif isinstance(first, (sp.bsr_matrix, sp.bsr_array)):
+                return sp_conc.tobsr()
+            elif isinstance(first, (sp.coo_matrix, sp.coo_array)):
+                return sp_conc.tocoo()
+            elif isinstance(first, (sp.dia_matrix, sp.dia_array)):
+                return sp_conc.todia()
+            elif isinstance(first, (sp.lil_matrix, sp.lil_array)):
+                return sp_conc.tolil()
+            else:
+                return sp_conc
+
+        warn("Not all elements are scipy sparse arrays.")
+
+        if is_list_of_type(x, (ndarray, sp.sparray, sp.spmatrix)):
+            return _generic_combine_cols_dense_sparse(x)
+
+        raise ValueError("All elements must be 2-dimensional matrices.")
+
+    combine_cols.register(sp.sparray, _combine_cols_sparse_arrays)
+    combine_cols.register(sp.spmatrix, _combine_cols_sparse_arrays)
+except Exception:
+    pass
+
+
+try:
+    import pandas as pd
+
+    def _combine_cols_pandas_dataframe(*x):
+        if is_list_of_type(x, pd.DataFrame):
+            return pd.concat(x, axis=0)
+
+        # not everything is a dataframe
+        if any([isinstance(y, dict) for y in x]) is True:
+            elems = []
+            for elem in x:
+                if isinstance(elem, dict):
+                    elems.append(pd.DataFrame(elem))
+                else:
+                    elems.append(elem)
+
+            return pd.concat(elems, axis=0)
+
+        raise TypeError("All elements must be Pandas DataFrame objects.")
+
+    combine_cols.register(pd.DataFrame, _combine_cols_pandas_dataframe)
+except Exception:
+    pass

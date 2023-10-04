@@ -124,14 +124,3 @@ def test_pandas_series():
     assert isinstance(z, pd.Series)
     assert len(z) == 4
 
-
-def test_pandas_dataframe():
-    df1 = pd.DataFrame([["a", 1], ["b", 2]], columns=["letter", "number"])
-
-    df2 = pd.DataFrame(
-        [["c", 3, "cat"], ["d", 4, "dog"]], columns=["letter", "number", "animal"]
-    )
-
-    z = combine(df1, df2)
-
-    assert isinstance(z, pd.DataFrame)

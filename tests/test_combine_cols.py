@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from biocgenerics.combine_cols import combine_cols
 from scipy import sparse as sp
 
@@ -37,5 +38,16 @@ def test_combine_cols_mixed():
 
     z = combine_cols(x, y)
 
-    assert isinstance(z, sp.spmatrix)
+    assert isinstance(z, np.ndarray)
     assert z.shape == (20, 30)
+
+
+def test_pandas_dataframe():
+    df1 = pd.DataFrame([["a", 1], ["b", 2]], columns=["letter", "number"])
+
+    df2 = pd.DataFrame(
+        [["c", 3, "cat"], ["d", 4, "dog"]], columns=["letter", "number", "animal"]
+    )
+
+    z = combine_cols(df1, df2)
+    assert isinstance(z, pd.DataFrame)
