@@ -38,7 +38,7 @@ def combine_seqs(*x: Any):
     :py:func:`~pandas.concat`.
 
     For all other scenario's, all elements are coerced to a :py:class:`~list` and
-    combine_seqsd.
+    combined.
 
     Args:
         x (Any): Array of vector-like objects to combine_seqs.
@@ -117,7 +117,6 @@ def _combine_seqs_dense_arrays(*x: ndarray):
 
 
 if _is_package_installed("scipy") is True:
-    print("scipy is installed")
     import scipy.sparse as sp
 
     def _combine_seqs_sparse_arrays(*x):
@@ -157,7 +156,6 @@ if _is_package_installed("scipy") is True:
 
 
 if _is_package_installed("pandas") is True:
-    print("pandas is installed")
     from pandas import Series, concat
 
     @combine_seqs.register(Series)

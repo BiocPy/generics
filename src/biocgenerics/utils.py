@@ -86,10 +86,7 @@ def _is_package_installed(package_name: str):
     try:
         exec(f"import {package_name}")
         _installed = True
-    except Exception as e:
-        print(str(e))
+    except Exception:
         pass
-
-    print(package_name, "::::", _installed)
 
     return _installed

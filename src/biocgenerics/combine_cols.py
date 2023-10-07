@@ -120,7 +120,6 @@ if _is_package_installed("scipy") is True:
 
 
 if _is_package_installed("pandas") is True:
-    print("pandas is installed")
     from pandas import DataFrame, concat
 
     @combine_cols.register(DataFrame)
