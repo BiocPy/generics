@@ -47,10 +47,6 @@ def combine_cols(*x: Any):
         is returned.
     """
 
-    first_object = x[0]
-    if hasattr(first_object, "combine_cols"):
-        return first_object.combine_cols(*x[1:])
-
     raise NotImplementedError("`combine_cols` method is not implemented for objects.")
 
 
@@ -86,7 +82,7 @@ def _combine_cols_dense_arrays(*x: ndarray):
     raise ValueError("All elements must be 2-dimensional matrices.")
 
 
-if _is_package_installed("scipy.sparse") is True:
+if _is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_cols_sparse_arrays(*x):
@@ -124,11 +120,13 @@ if _is_package_installed("scipy.sparse") is True:
 
 
 if _is_package_installed("pandas") is True:
-    import pandas as pd
+    print("pandas is installed")
+    from pandas import DataFrame, concat
 
+    @combine_cols.register(DataFrame)
     def _combine_cols_pandas_dataframe(*x):
-        if is_list_of_type(x, pd.DataFrame):
-            return pd.concat(x, axis=0)
+        if is_list_of_type(x, DataFrame):
+            return concat(x, axis=0)
 
         # not everything is a dataframe
         # if any([isinstance(y, dict) for y in x]) is True:
@@ -142,4 +140,4 @@ if _is_package_installed("pandas") is True:
 
         raise TypeError("All elements must be Pandas DataFrame objects.")
 
-    combine_cols.register(pd.DataFrame, _combine_cols_pandas_dataframe)
+    # combine_cols.register(DataFrame, _combine_cols_pandas_dataframe)

@@ -47,10 +47,6 @@ def combine_rows(*x: Any):
         is returned.
     """
 
-    first_object = x[0]
-    if hasattr(first_object, "combine_rows"):
-        return first_object.combine_rows(*x[1:])
-
     raise NotImplementedError("`combine_rows` method is not implemented for objects.")
 
 
@@ -86,7 +82,7 @@ def _combine_rows_dense_arrays(*x: ndarray):
     raise ValueError("All elements must be 2-dimensional matrices.")
 
 
-if _is_package_installed("scipy.sparse") is True:
+if _is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_rows_sparse_arrays(*x):
@@ -124,11 +120,12 @@ if _is_package_installed("scipy.sparse") is True:
 
 
 if _is_package_installed("pandas") is True:
-    import pandas as pd
+    from pandas import DataFrame, concat
 
+    @combine_rows.register(DataFrame)
     def _combine_rows_pandas_dataframe(*x):
-        if is_list_of_type(x, pd.DataFrame):
-            return pd.concat(x, axis=1)
+        if is_list_of_type(x, DataFrame):
+            return concat(x, axis=1)
 
         # not everything is a dataframe
         # if any([isinstance(y, dict) for y in x]) is True:
@@ -142,4 +139,4 @@ if _is_package_installed("pandas") is True:
 
         raise TypeError("All elements must be Pandas DataFrame objects.")
 
-    combine_rows.register(pd.DataFrame, _combine_rows_pandas_dataframe)
+    # combine_rows.register(DataFrame, _combine_rows_pandas_dataframe)

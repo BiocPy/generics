@@ -116,7 +116,8 @@ def _combine_seqs_dense_arrays(*x: ndarray):
     return _generic_coerce_list(x)
 
 
-if _is_package_installed("scipy.sparse") is True:
+if _is_package_installed("scipy") is True:
+    print("scipy is installed")
     import scipy.sparse as sp
 
     def _combine_seqs_sparse_arrays(*x):
@@ -156,23 +157,25 @@ if _is_package_installed("scipy.sparse") is True:
 
 
 if _is_package_installed("pandas") is True:
-    import pandas as pd
+    print("pandas is installed")
+    from pandas import Series, concat
 
+    @combine_seqs.register(Series)
     def _combine_seqs_pandas_series(*x):
-        if is_list_of_type(x, pd.Series):
-            return pd.concat(x)
+        if is_list_of_type(x, Series):
+            return concat(x)
 
         # not everything is a Series
         if any([isinstance(y, list) for y in x]) is True:
             elems = []
             for elem in x:
                 if isinstance(elem, list):
-                    elems.append(pd.Series(elem))
+                    elems.append(Series(elem))
                 else:
                     elems.append(elem)
 
-            return pd.concat(elems)
+            return concat(elems)
 
         raise TypeError("All elements must be Pandas Series objects.")
 
-    combine_seqs.register(pd.Series, _combine_seqs_pandas_series)
+    # combine_seqs.register(Series, _combine_seqs_pandas_series)

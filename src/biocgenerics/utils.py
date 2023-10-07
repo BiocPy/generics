@@ -84,9 +84,12 @@ def _do_arrays_match(x, dim: int):
 def _is_package_installed(package_name: str):
     _installed = False
     try:
-        eval(f"import {package_name}")
+        exec(f"import {package_name}")
         _installed = True
-    except Exception:
+    except Exception as e:
+        print(str(e))
         pass
+
+    print(package_name, "::::", _installed)
 
     return _installed
