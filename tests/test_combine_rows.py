@@ -51,3 +51,13 @@ def test_pandas_dataframe():
 
     z = combine_rows(df1, df2)
     assert isinstance(z, pd.DataFrame)
+
+def test_combine_rows_ndim():
+    num_cols = 20
+    x = np.ones(shape=(20, num_cols, 20))
+    y = np.ones(shape=(10, num_cols, num_cols))
+
+    z = combine_rows(x, y, y)
+
+    assert isinstance(z, np.ndarray)
+    assert z.shape == (40, 20, 20)
