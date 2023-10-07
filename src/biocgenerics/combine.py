@@ -14,9 +14,8 @@ __license__ = "MIT"
 
 @singledispatch
 def combine(*x: Any):
-    """Generic combine that delegates calls to :py:func:`~biocgenerics.combine_seqs.combine_seqs` 
-    for 1-dimensional or vector like objects, 
-    or :py:func:`~biocgenerics.combine_rows.combine_rows` for n-dimensional objects.
+    """Generic combine that delegates calls to :py:func:`~biocgenerics.combine_seqs.combine_seqs` for 1-dimensional or
+    vector like objects, or :py:func:`~biocgenerics.combine_rows.combine_rows` for n-dimensional objects.
 
     Args:
         x (Any): Objects to combine.
