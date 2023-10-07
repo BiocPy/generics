@@ -22,26 +22,21 @@ __license__ = "MIT"
 def combine_seqs(*x: Any):
     """combine_seqs vector-like objects (1-dimensional arrays).
 
-    Custom classes may implement their own ``combine_seqs`` method.
+    If all elements are :py:class:`~numpy.ndarray`,
+    we combine them using numpy's :py:func:`~numpy.concatenate`.
 
-    If the first element in ``x`` contains a ``combine_seqs`` method,
-    the rest of the arguments are passed to that method.
-
-    If all elements are 1-dimensional :py:class:`~numpy.ndarray`,
-    we combine_seqs them using numpy's :py:func:`~numpy.concatenate`.
-
-    If all elements are either 1-dimensional :py:class:`~scipy.sparse.spmatrix` or
-    :py:class:`~scipy.sparse.sparray`, these objects are combine_seqsd
+    If all elements are either :py:class:`~scipy.sparse.spmatrix` or
+    :py:class:`~scipy.sparse.sparray`, these objects are combined
     using scipy's :py:class:`~scipy.sparse.hstack`.
 
-    If all elements are :py:class:`~pandas.Series` objects, they are combine_seqsd using
+    If all elements are :py:class:`~pandas.Series` objects, they are combined using
     :py:func:`~pandas.concat`.
 
     For all other scenario's, all elements are coerced to a :py:class:`~list` and
     combined.
 
     Args:
-        x (Any): Array of vector-like objects to combine_seqs.
+        x (Any): Vector-like objects to combine.
 
             All elements of ``x`` are expected to be the same class or
             atleast compatible with each other.
@@ -50,9 +45,9 @@ def combine_seqs(*x: Any):
         TypeError: If any object in the list cannot be coerced to a list.
 
     Returns:
-        A combine_seqsd object, typically the same type as the first element in ``x``.
-        If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray` is returned.
-        A list if one of the objects is a list.
+        A combined object, typically the same type as the first element in ``x``.
+        A :py:class:`~numpy.ndarray`, if the elements are a mix of dense and sparse objects.
+        A :py:class:`~list`, if one of the objects is a :py:class:`~list`.
     """
 
     raise NotImplementedError("`combine_seqs` method is not implemented for objects.")
@@ -175,5 +170,3 @@ if _is_package_installed("pandas") is True:
             return concat(elems)
 
         raise TypeError("All elements must be Pandas Series objects.")
-
-    # combine_seqs.register(Series, _combine_seqs_pandas_series)

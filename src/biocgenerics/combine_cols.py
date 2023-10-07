@@ -18,33 +18,27 @@ __license__ = "MIT"
 
 @singledispatch
 def combine_cols(*x: Any):
-    """Combine 2-dimensional objects.
+    """Combine n-dimensional objects along the second dimension.
 
-    Custom classes may implement their own ``combine_cols`` method.
-
-    If the first element in ``x`` contains a ``combine_cols`` method,
-    the rest of the arguments are passed to that method.
-
-    If all elements are 2-dimensional :py:class:`~numpy.ndarray`,
+    If all elements are :py:class:`~numpy.ndarray`,
     we combine them using numpy's :py:func:`~numpy.concatenate`.
 
-    If all elements are either 2-dimensional :py:class:`~scipy.sparse.spmatrix` or
+    If all elements are either :py:class:`~scipy.sparse.spmatrix` or
     :py:class:`~scipy.sparse.sparray`, these objects are combined
     using scipy's :py:class:`~scipy.sparse.hstack`.
 
     If all elements are :py:class:`~pandas.DataFrame` objects, they are combined using
-    :py:func:`~pandas.concat` along the 2nd axis.
+    :py:func:`~pandas.concat` along the second axis.
 
     Args:
-        x (Any): Array of 2-dimensional objects to combine.
+        x (Any): n-dimensional objects to combine.
 
             All elements of x are expected to be the same class or
             atleast compatible with each other.
 
     Returns:
         A combined object, typically the same type as the first element in ``x``.
-        If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray`
-        is returned.
+        A :py:class:`~numpy.ndarray`, if the elements are a mix of dense and sparse objects.
     """
 
     raise NotImplementedError("`combine_cols` method is not implemented for objects.")
@@ -127,16 +121,4 @@ if _is_package_installed("pandas") is True:
         if is_list_of_type(x, DataFrame):
             return concat(x, axis=0)
 
-        # not everything is a dataframe
-        # if any([isinstance(y, dict) for y in x]) is True:
-        #     elems = []
-        #     for elem in x:
-        #         if isinstance(elem, dict):
-        #             elems.append(pd.DataFrame(elem))
-        #         else:
-        #             elems.append(elem)
-        #     return pd.concat(elems, axis=0)
-
         raise TypeError("All elements must be Pandas DataFrame objects.")
-
-    # combine_cols.register(DataFrame, _combine_cols_pandas_dataframe)
