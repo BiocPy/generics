@@ -79,3 +79,14 @@ def _do_arrays_match(x, dim: int):
 
     first = all_shapes[0]
     return all(y == first for y in all_shapes)
+
+
+def _is_package_installed(package_name: str):
+    _installed = False
+    try:
+        eval(f"import {package_name}")
+        _installed = True
+    except Exception:
+        pass
+
+    return _installed

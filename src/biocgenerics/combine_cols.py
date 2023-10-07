@@ -7,6 +7,7 @@ from numpy import hstack, ndarray
 from .utils import (
     _convert_sparse_to_dense,
     _do_arrays_match,
+    _is_package_installed,
     is_list_of_type,
 )
 
@@ -85,7 +86,7 @@ def _combine_cols_dense_arrays(*x: ndarray):
     raise ValueError("All elements must be 2-dimensional matrices.")
 
 
-try:
+if _is_package_installed("scipy.sparse") is True:
     import scipy.sparse as sp
 
     def _combine_cols_sparse_arrays(*x):
@@ -120,11 +121,9 @@ try:
 
     combine_cols.register(sp.sparray, _combine_cols_sparse_arrays)
     combine_cols.register(sp.spmatrix, _combine_cols_sparse_arrays)
-except Exception:
-    pass
 
 
-try:
+if _is_package_installed("pandas") is True:
     import pandas as pd
 
     def _combine_cols_pandas_dataframe(*x):
@@ -132,18 +131,15 @@ try:
             return pd.concat(x, axis=0)
 
         # not everything is a dataframe
-        if any([isinstance(y, dict) for y in x]) is True:
-            elems = []
-            for elem in x:
-                if isinstance(elem, dict):
-                    elems.append(pd.DataFrame(elem))
-                else:
-                    elems.append(elem)
-
-            return pd.concat(elems, axis=0)
+        # if any([isinstance(y, dict) for y in x]) is True:
+        #     elems = []
+        #     for elem in x:
+        #         if isinstance(elem, dict):
+        #             elems.append(pd.DataFrame(elem))
+        #         else:
+        #             elems.append(elem)
+        #     return pd.concat(elems, axis=0)
 
         raise TypeError("All elements must be Pandas DataFrame objects.")
 
     combine_cols.register(pd.DataFrame, _combine_cols_pandas_dataframe)
-except Exception:
-    pass

@@ -1,6 +1,8 @@
 from functools import singledispatch
 from typing import Any, List
 
+from .utils import _is_package_installed
+
 __author__ = "jkanche"
 __copyright__ = "jkanche"
 __license__ = "MIT"
@@ -25,15 +27,12 @@ def rownames(x) -> List[str]:
     raise NotImplementedError(f"`rownames` do not exist for class: '{type(x)}'.")
 
 
-try:
+if _is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @rownames.register(DataFrame)
     def _rownames_dataframe(x: DataFrame) -> list:
         return x.index
-
-except Exception:
-    pass
 
 
 @singledispatch
@@ -53,7 +52,7 @@ def set_rownames(x: Any, names: List[str]):
     raise NotImplementedError(f"Cannot set `rownames` for class: {type(x)}")
 
 
-try:
+if _is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @set_rownames.register(DataFrame)
@@ -61,6 +60,3 @@ try:
         x.index = names
 
         return x
-
-except Exception:
-    pass
