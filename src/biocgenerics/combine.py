@@ -14,7 +14,7 @@ __license__ = "MIT"
 
 @singledispatch
 def combine(*x: Any):
-    """combine vector-like objects (1-dimensional arrays).
+    """Combine vector-like objects (1-dimensional arrays).
 
     Custom classes may implement their own ``combine`` method.
 
