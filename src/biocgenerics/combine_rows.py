@@ -7,6 +7,7 @@ from numpy import concatenate, ndarray
 from .utils import (
     _convert_sparse_to_dense,
     _do_arrays_match,
+    _is_package_installed,
     is_list_of_type,
 )
 
@@ -17,17 +18,12 @@ __license__ = "MIT"
 
 @singledispatch
 def combine_rows(*x: Any):
-    """Combine 2-dimensional objects.
+    """Combine n-dimensional objects along their first dimension.
 
-    Custom classes may implement their own ``combine_rows`` method.
-
-    If the first element in ``x`` contains a ``combine_rows`` method,
-    the rest of the arguments are passed to that method.
-
-    If all elements are 2-dimensional :py:class:`~numpy.ndarray`,
+    If all elements are :py:class:`~numpy.ndarray`,
     we combine them using numpy's :py:func:`~numpy.concatenate`.
 
-    If all elements are either 2-dimensional :py:class:`~scipy.sparse.spmatrix` or
+    If all elements are either :py:class:`~scipy.sparse.spmatrix` or
     :py:class:`~scipy.sparse.sparray`, these objects are combined
     using scipy's :py:class:`~scipy.sparse.vstack`.
 
@@ -35,20 +31,15 @@ def combine_rows(*x: Any):
     :py:func:`~pandas.concat` along the first axis.
 
     Args:
-        x (Any): Array of 2-dimensional objects to combine.
+        x (Any): n-dimensional objects to combine.
 
             All elements of x are expected to be the same class or
             atleast compatible with each other.
 
     Returns:
         A combined object, typically the same type as the first element in ``x``.
-        If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray`
-        is returned.
+        A :py:class:`~numpy.ndarray`, if the elements are a mix of dense and sparse objects.
     """
-
-    first_object = x[0]
-    if hasattr(first_object, "combine_rows"):
-        return first_object.combine_rows(*x[1:])
 
     raise NotImplementedError("`combine_rows` method is not implemented for objects.")
 
@@ -85,7 +76,7 @@ def _combine_rows_dense_arrays(*x: ndarray):
     raise ValueError("All elements must be 2-dimensional matrices.")
 
 
-try:
+if _is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_rows_sparse_arrays(*x):
@@ -120,30 +111,14 @@ try:
 
     combine_rows.register(sp.sparray, _combine_rows_sparse_arrays)
     combine_rows.register(sp.spmatrix, _combine_rows_sparse_arrays)
-except Exception:
-    pass
 
 
-try:
-    import pandas as pd
+if _is_package_installed("pandas") is True:
+    from pandas import DataFrame, concat
 
+    @combine_rows.register(DataFrame)
     def _combine_rows_pandas_dataframe(*x):
-        if is_list_of_type(x, pd.DataFrame):
-            return pd.concat(x, axis=1)
-
-        # not everything is a dataframe
-        if any([isinstance(y, dict) for y in x]) is True:
-            elems = []
-            for elem in x:
-                if isinstance(elem, dict):
-                    elems.append(pd.DataFrame(elem))
-                else:
-                    elems.append(elem)
-
-            return pd.concat(elems, axis=1)
+        if is_list_of_type(x, DataFrame):
+            return concat(x, axis=1)
 
         raise TypeError("All elements must be Pandas DataFrame objects.")
-
-    combine_rows.register(pd.DataFrame, _combine_rows_pandas_dataframe)
-except Exception:
-    pass

@@ -1,6 +1,8 @@
 from functools import singledispatch
 from typing import List
 
+from .utils import _is_package_installed
+
 __author__ = "jkanche"
 __copyright__ = "jkanche"
 __license__ = "MIT"
@@ -25,15 +27,12 @@ def colnames(x) -> list:
     raise NotImplementedError(f"`colnames` is not supported for class: '{type(x)}'.")
 
 
-try:
+if _is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @colnames.register(DataFrame)
     def _colnames_dataframe(x: DataFrame) -> list:
         return x.columns
-
-except Exception:
-    pass
 
 
 @singledispatch
@@ -55,7 +54,7 @@ def set_colnames(x, names: List[str]):
     )
 
 
-try:
+if _is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @set_colnames.register(DataFrame)
@@ -63,6 +62,3 @@ try:
         x.columns = names
 
         return x
-
-except Exception:
-    pass

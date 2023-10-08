@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from biocgenerics.combine import combine
+from biocgenerics.combine_seqs import combine_seqs
 from scipy import sparse as sp
 
 __author__ = "jkanche"
@@ -12,7 +12,7 @@ def test_basic_list():
     x = [1, 2, "c"]
     y = ["a", "b"]
 
-    z = combine(x, y)
+    z = combine_seqs(x, y)
 
     assert z == x + y
     assert isinstance(z, list)
@@ -25,7 +25,7 @@ def test_basic_dense():
     xd = np.array([1, 2, 3])
     yd = np.array([0.1, 0.2], dtype=float)
 
-    zcomb = combine(xd, yd)
+    zcomb = combine_seqs(xd, yd)
 
     z = x + y
     zd = np.array(z)
@@ -40,7 +40,7 @@ def test_basic_mixed_dense_list():
     y = [0.1, 0.2]
     xd = np.array([1, 2, 3])
 
-    zcomb = combine(xd, y)
+    zcomb = combine_seqs(xd, y)
 
     z = x + y
 
@@ -54,7 +54,7 @@ def test_basic_mixed_tuple_list():
     y = (0.1, 0.2)
     xd = np.array([1, 2, 3])
 
-    zcomb = combine(xd, y, x)
+    zcomb = combine_seqs(xd, y, x)
 
     z = x + list(y) + x
 
@@ -70,7 +70,7 @@ def test_basic_sparse():
     sx = sp.csr_array(x)
     sy = sp.csr_array(y)
 
-    z = combine(sx, sy)
+    z = combine_seqs(sx, sy)
 
     assert isinstance(z, sp.spmatrix)
     assert z.shape[1] == len(x) + len(y)
@@ -79,7 +79,7 @@ def test_basic_sparse():
     sx = sp.csr_array(x)
     sy = sp.coo_array(y)
 
-    z = combine(sx, sy)
+    z = combine_seqs(sx, sy)
 
     assert isinstance(z, sp.spmatrix)
     assert z.shape[1] == len(x) + len(y)
@@ -91,7 +91,7 @@ def test_mixed_sparse_list():
     xd = np.array([1, 2, 3])
     sy = sp.csr_array(y)
 
-    zcomb = combine(sy, x)
+    zcomb = combine_seqs(sy, x)
 
     assert isinstance(zcomb, list)
     assert len(zcomb) == len(xd) + len(y)
@@ -103,7 +103,7 @@ def test_mixed_sparse_dense():
 
     sy = sp.csr_array(y)
 
-    z = combine(x, sy)
+    z = combine_seqs(x, sy)
 
     assert isinstance(z, np.ndarray)
     assert z.shape[0] == len(x) + len(y)
@@ -113,13 +113,13 @@ def test_pandas_series():
     s1 = pd.Series(["a", "b"])
     s2 = pd.Series(["c", "d"])
 
-    z = combine(s1, s2)
+    z = combine_seqs(s1, s2)
 
     assert isinstance(z, pd.Series)
     assert len(z) == 4
 
     x = ["gg", "ff"]
 
-    z = combine(s1, x)
+    z = combine_seqs(s1, x)
     assert isinstance(z, pd.Series)
     assert len(z) == 4
