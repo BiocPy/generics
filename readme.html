@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Contributing" href="contributing.html" /><link rel="prev" title="biocgenerics" href="index.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>BiocGenerics - biocgenerics 0.0.3 documentation</title>
+        <title>BiocGenerics - biocgenerics 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">biocgenerics 0.0.3 documentation</div></a>
+      <a href="index.html"><div class="brand">biocgenerics 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">biocgenerics 0.0.3 documentation</span>
+  <span class="sidebar-brand-text">biocgenerics 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -201,27 +201,72 @@
           <!-- These are examples of badges you might want to add to your README:
      please update the URLs accordingly
 
+[![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
 [![Built Status](https://api.cirrus-ci.com/github/<USER>/biocgenerics.svg?branch=main)](https://cirrus-ci.com/github/<USER>/biocgenerics)
 [![ReadTheDocs](https://readthedocs.org/projects/biocgenerics/badge/?version=latest)](https://biocgenerics.readthedocs.io/en/stable/)
 [![Coveralls](https://img.shields.io/coveralls/github/<USER>/biocgenerics/main.svg)](https://coveralls.io/r/<USER>/biocgenerics)
-[![PyPI-Server](https://img.shields.io/pypi/v/biocgenerics.svg)](https://pypi.org/project/biocgenerics/)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/biocgenerics.svg)](https://anaconda.org/conda-forge/biocgenerics)
-[![Monthly Downloads](https://pepy.tech/badge/biocgenerics/month)](https://pepy.tech/project/biocgenerics)
 [![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Twitter)](https://twitter.com/biocgenerics)
 -->
-<p><a class="reference external" href="https://pyscaffold.org/"><img alt="Project generated with PyScaffold" src="https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold" /></a></p>
 <section class="tex2jax_ignore mathjax_ignore" id="biocgenerics">
 <h1>BiocGenerics<a class="headerlink" href="#biocgenerics" title="Link to this heading">#</a></h1>
-<blockquote>
-<div><p>Generics for core BiocPy classes</p>
-</div></blockquote>
-<p>I do not expect users to use this package directly at the moment. Developers who want to extend BiocPy’s functionality can use this to support new data structures and experiments.</p>
+<p><a class="reference external" href="https://pypi.org/project/biocgenerics/"><img alt="PyPI-Server" src="https://img.shields.io/pypi/v/biocgenerics.svg" /></a>
+<a class="reference external" href="https://pepy.tech/project/biocgenerics"><img alt="Monthly Downloads" src="https://pepy.tech/badge/biocgenerics/month" /></a>
+<img alt="Unit tests" src="https://github.com/BiocPy/generics/actions/workflows/pypi-test.yml/badge.svg" /></p>
+<p>This package aims to provide common generics, much like R/Bioconductor. These generics allow users to operate on different objects is a consistent and reliable way.</p>
 <section id="install">
 <h2>Install<a class="headerlink" href="#install" title="Link to this heading">#</a></h2>
-<p>Package is published to <a class="reference external" href="https://pypi.org/project/biocgenerics/">PyPI</a></p>
+<p>Install package from <a class="reference external" href="https://pypi.org/project/biocgenerics/">PyPI</a></p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>biocgenerics
 </pre></div>
 </div>
+</section>
+<section id="combine">
+<h2>Combine<a class="headerlink" href="#combine" title="Link to this heading">#</a></h2>
+<p>Combine provide multiple functions to concatenate sequences and array-like objects.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">combine_seqs</span></code>: Combine 1-dimensional sequences or vector-like objects.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">combine_rows</span></code>: Combine n-dimensional or DataFrame like objects along the first dimension.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">combine_cols</span></code>: Combine n-dimensional or DataFrame like objects along the second dimension.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">biocgenerics</span> <span class="kn">import</span> <span class="n">combine_seqs</span><span class="p">,</span> <span class="n">combine_rows</span>
+
+<span class="c1"># example to combine multiple sequences</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">combine_seqs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+<span class="c1"># Works across types as well,</span>
+<span class="c1"># e.g. sparse and dense matrices</span>
+
+<span class="n">num_cols</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_cols</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">num_cols</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">combine_rows</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Additionally, the <code class="docutils literal notranslate"><span class="pre">combine</span></code> generic, automatically dispatches to either <code class="docutils literal notranslate"><span class="pre">combine_seqs</span></code> or <code class="docutils literal notranslate"><span class="pre">combine_cols</span></code> methods depending on the inputs.</p>
+</section>
+<section id="set-and-access-names">
+<h2>Set and Access names<a class="headerlink" href="#set-and-access-names" title="Link to this heading">#</a></h2>
+<p>Reliably access row and column names of <strong>Dataframe</strong>-like objects.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rownames</span></code>: Access row names of the object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_rownames</span></code>: Set new row names.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">colnames</span></code>: Access column names.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set_colnames</span></code>: Set new column names.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">biocgenerics</span> <span class="kn">import</span> <span class="n">rownames</span>
+
+<span class="n">df1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;letter&quot;</span><span class="p">,</span> <span class="s2">&quot;number&quot;</span><span class="p">])</span>
+
+<span class="n">rownames</span><span class="p">(</span><span class="n">df1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Check out the <a class="reference external" href="https://github.com/Bioconductor/S4Vectors">S4Vectors</a> package for more information.</p>
 <!-- pyscaffold-notes -->
 </section>
 <section id="note">
@@ -288,6 +333,8 @@ information on PyScaffold see <a class="reference external" href="https://pyscaf
             <ul>
 <li><a class="reference internal" href="#">BiocGenerics</a><ul>
 <li><a class="reference internal" href="#install">Install</a></li>
+<li><a class="reference internal" href="#combine">Combine</a></li>
+<li><a class="reference internal" href="#set-and-access-names">Set and Access names</a></li>
 <li><a class="reference internal" href="#note">Note</a></li>
 </ul>
 </li>
@@ -300,7 +347,7 @@ information on PyScaffold see <a class="reference external" href="https://pyscaf
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=47de8214"></script>
+</div><script src="_static/documentation_options.js?v=01f34227"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=32e29ea5"></script>

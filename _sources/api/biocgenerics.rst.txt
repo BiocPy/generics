@@ -36,6 +36,14 @@ biocgenerics.combine\_rows module
    :undoc-members:
    :show-inheritance:
 
+biocgenerics.combine\_seqs module
+---------------------------------
+
+.. automodule:: biocgenerics.combine_seqs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 biocgenerics.rownames module
 ----------------------------
 

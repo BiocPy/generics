@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>biocgenerics.combine - biocgenerics 0.0.3 documentation</title>
+        <title>biocgenerics.combine - biocgenerics 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
@@ -122,7 +122,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">biocgenerics 0.0.3 documentation</div></a>
+      <a href="../../index.html"><div class="brand">biocgenerics 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -145,7 +145,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <span class="sidebar-brand-text">biocgenerics 0.0.3 documentation</span>
+  <span class="sidebar-brand-text">biocgenerics 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,19 +198,13 @@
         <article role="main">
           <h1>Source code for biocgenerics.combine</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">singledispatch</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
-<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">concatenate</span><span class="p">,</span> <span class="n">ndarray</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
 
 <span class="kn">from</span> <span class="nn">.combine_rows</span> <span class="kn">import</span> <span class="n">combine_rows</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_convert_1d_sparse_to_dense</span><span class="p">,</span>
-    <span class="n">_is_1d_dense_arrays</span><span class="p">,</span>
-    <span class="n">_is_1d_sparse_arrays</span><span class="p">,</span>
-    <span class="n">is_list_of_type</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.combine_seqs</span> <span class="kn">import</span> <span class="n">combine_seqs</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_is_1d_dense_arrays</span><span class="p">,</span> <span class="n">_is_1d_sparse_arrays</span><span class="p">,</span> <span class="n">_is_package_installed</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;jkanche&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;jkanche&quot;</span>
@@ -221,172 +215,59 @@
 <a class="viewcode-back" href="../../api/biocgenerics.html#biocgenerics.combine.combine">[docs]</a>
 <span class="nd">@singledispatch</span>
 <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine vector-like objects (1-dimensional arrays).</span>
-
-<span class="sd">    Custom classes may implement their own ``combine`` method.</span>
-
-<span class="sd">    If the first element in ``x`` contains a ``combine`` method,</span>
-<span class="sd">    the rest of the arguments are passed to that method.</span>
-
-<span class="sd">    If all elements are 1-dimensional :py:class:`~numpy.ndarray`,</span>
-<span class="sd">    we combine them using numpy&#39;s :py:func:`~numpy.concatenate`.</span>
-
-<span class="sd">    If all elements are either 1-dimensional :py:class:`~scipy.sparse.spmatrix` or</span>
-<span class="sd">    :py:class:`~scipy.sparse.sparray`, these objects are combined</span>
-<span class="sd">    using scipy&#39;s :py:class:`~scipy.sparse.hstack`.</span>
-
-<span class="sd">    If all elements are :py:class:`~pandas.Series` objects, they are combined using</span>
-<span class="sd">    :py:func:`~pandas.concat`.</span>
-
-<span class="sd">    For all other scenario&#39;s, all elements are coerced to a :py:class:`~list` and</span>
-<span class="sd">    combined.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic combine that delegates calls to :py:func:`~biocgenerics.combine_seqs.combine_seqs` for 1-dimensional or</span>
+<span class="sd">    vector like objects, or :py:func:`~biocgenerics.combine_rows.combine_rows` for n-dimensional objects.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        x (Any): Array of vector-like objects to combine.</span>
+<span class="sd">        x (Any): Objects to combine.</span>
 
 <span class="sd">            All elements of ``x`` are expected to be the same class or</span>
 <span class="sd">            atleast compatible with each other.</span>
 
-<span class="sd">    Raises:</span>
-<span class="sd">        TypeError: If any object in the list cannot be coerced to a list.</span>
-
 <span class="sd">    Returns:</span>
 <span class="sd">        A combined object, typically the same type as the first element in ``x``.</span>
-<span class="sd">        If the elements are a mix of dense and sparse objects, a :py:class:`~numpy.ndarray` is returned.</span>
-<span class="sd">        A list if one of the objects is a list.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">first_object</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">first_object</span><span class="p">,</span> <span class="s2">&quot;combine&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">first_object</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
 
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;`combine` method is not implemented for objects.&quot;</span><span class="p">)</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_generic_combine_dense_sparse</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">):</span>
-            <span class="n">elem</span> <span class="o">=</span> <span class="n">_convert_1d_sparse_to_dense</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-
-        <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">_is_1d_dense_arrays</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Not all elements are 1-dimensional arrays, using `combine_rows` instead.&quot;</span><span class="p">)</span>
-        <span class="n">combine_rows</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">concatenate</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">_generic_coerce_list</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">):</span>
-            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">):</span>  <span class="c1"># probably a sparse</span>
-            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">_convert_1d_sparse_to_dense</span><span class="p">(</span><span class="n">elem</span><span class="p">)))</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>  <span class="c1"># do nothing</span>
-            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># not sure what else</span>
-            <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">combine</span><span class="p">(</span><span class="o">*</span><span class="n">elems</span><span class="p">)</span>
-
-
 <span class="nd">@combine</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_combine_lists</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 
 
 <span class="nd">@combine</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">ndarray</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">_combine_dense_arrays</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">is_list_of_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">_is_1d_dense_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;Not all elements are 1-dimensional arrays, using `combine_rows` instead.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">combine_rows</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_is_1d_dense_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Not all elements are numpy ndarrays.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="c1"># assuming it&#39;s a mix of numpy and scipy arrays</span>
-        <span class="k">return</span> <span class="n">_generic_combine_dense_sparse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="c1"># coerce everything to a list and combine</span>
-    <span class="k">return</span> <span class="n">_generic_coerce_list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">combine_rows</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 
 
-<span class="k">try</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">_is_package_installed</span><span class="p">(</span><span class="s2">&quot;scipy&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sp</span>
 
-    <span class="k">def</span> <span class="nf">_combine_sparse_arrays</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">is_list_of_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">sparray</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">)):</span>
-            <span class="n">sp_conc</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_combine_sparse</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_is_1d_sparse_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">_is_1d_sparse_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span>
-                    <span class="s2">&quot;Not all elements are 1-dimensional arrays, using `combine_rows` instead.&quot;</span>
-                <span class="p">)</span>
-                <span class="n">combine_rows</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">combine_rows</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 
-            <span class="n">first</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">csr_array</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="n">sp_conc</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">csc_array</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="n">sp_conc</span><span class="o">.</span><span class="n">tocsc</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">bsr_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">bsr_array</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="n">sp_conc</span><span class="o">.</span><span class="n">tobsr</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">coo_array</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="n">sp_conc</span><span class="o">.</span><span class="n">tocoo</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">dia_array</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="n">sp_conc</span><span class="o">.</span><span class="n">todia</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">lil_matrix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">lil_array</span><span class="p">)):</span>
-                <span class="k">return</span> <span class="n">sp_conc</span><span class="o">.</span><span class="n">tolil</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">sp_conc</span>
-
-        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Not all elements are scipy sparse arrays.&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">is_list_of_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">sparray</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">)):</span>
-            <span class="k">return</span> <span class="n">_generic_combine_dense_sparse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">_generic_coerce_list</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="n">combine</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">sparray</span><span class="p">,</span> <span class="n">_combine_sparse_arrays</span><span class="p">)</span>
-    <span class="n">combine</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">,</span> <span class="n">_combine_sparse_arrays</span><span class="p">)</span>
-<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-    <span class="k">pass</span>
+    <span class="n">combine_seqs</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">sparray</span><span class="p">,</span> <span class="n">_combine_sparse</span><span class="p">)</span>
+    <span class="n">combine_seqs</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">spmatrix</span><span class="p">,</span> <span class="n">_combine_sparse</span><span class="p">)</span>
 
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="k">if</span> <span class="n">_is_package_installed</span><span class="p">(</span><span class="s2">&quot;pandas&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Series</span>
 
-    <span class="k">def</span> <span class="nf">_combine_pandas_series</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">is_list_of_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="nd">@combine</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Series</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_combine_series</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 
-        <span class="c1"># not everything is a Series</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">elems</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-
-            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">elems</span><span class="p">)</span>
-
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;All elements must be Pandas Series objects.&quot;</span><span class="p">)</span>
-
-    <span class="n">combine</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">_combine_pandas_series</span><span class="p">)</span>
-<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-    <span class="k">pass</span>
+    <span class="nd">@combine</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DataFrame</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_combine_df</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">combine_seqs</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>
@@ -419,7 +300,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=47de8214"></script>
+</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
