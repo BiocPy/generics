@@ -42,7 +42,7 @@ y = [0.1, 0.2]
 
 print(combine_seqs(x, y))
 
-# Works across types as well, 
+# Works across types as well,
 # e.g. sparse and dense matrices
 
 num_cols = 20
