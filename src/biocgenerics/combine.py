@@ -52,7 +52,10 @@ if _is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_sparse(*x):
-        if _is_any_element_list(x, (list, tuple)) is True or _is_1d_sparse_arrays(x) is True:
+        if (
+            _is_any_element_list(x, (list, tuple)) is True
+            or _is_1d_sparse_arrays(x) is True
+        ):
             return combine_seqs(*x)
 
         return combine_rows(*x)

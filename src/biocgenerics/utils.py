@@ -1,4 +1,3 @@
-from typing import Any
 
 __author__ = "jkanche, keviny2"
 __copyright__ = "jkanche"

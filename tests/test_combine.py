@@ -19,11 +19,12 @@ def test_basic_list():
     assert isinstance(z, list)
     assert len(z) == len(x) + len(y)
 
+
 def test_basic_mixed_dense_list():
     x = [1, 2, 3]
     y = [0.1, 0.2]
     xd = np.array([1, 2, 3])
-    
+
     zcomb = combine(xd, y)
 
     z = x + y
