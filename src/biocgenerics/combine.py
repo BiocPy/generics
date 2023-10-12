@@ -5,7 +5,12 @@ from numpy import ndarray
 
 from .combine_rows import combine_rows
 from .combine_seqs import combine_seqs
-from .utils import _is_1d_dense_arrays, _is_1d_sparse_arrays, _is_package_installed
+from .utils import (
+    _is_1d_dense_arrays,
+    _is_1d_sparse_arrays,
+    _is_any_element_list,
+    _is_package_installed,
+)
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -37,7 +42,7 @@ def _combine_lists(*x: list):
 
 @combine.register(ndarray)
 def _combine_dense_arrays(*x: ndarray):
-    if _is_1d_dense_arrays(x) is True:
+    if _is_any_element_list(x, (list, tuple)) is True or _is_1d_dense_arrays(x) is True:
         return combine_seqs(*x)
 
     return combine_rows(*x)
@@ -47,13 +52,16 @@ if _is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_sparse(*x):
-        if _is_1d_sparse_arrays(x) is True:
+        if (
+            _is_any_element_list(x, (list, tuple)) is True
+            or _is_1d_sparse_arrays(x) is True
+        ):
             return combine_seqs(*x)
 
         return combine_rows(*x)
 
-    combine_seqs.register(sp.sparray, _combine_sparse)
-    combine_seqs.register(sp.spmatrix, _combine_sparse)
+    combine.register(sp.sparray, _combine_sparse)
+    combine.register(sp.spmatrix, _combine_sparse)
 
 
 if _is_package_installed("pandas") is True:

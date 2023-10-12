@@ -1,24 +1,6 @@
-from typing import Any
-
 __author__ = "jkanche, keviny2"
 __copyright__ = "jkanche"
 __license__ = "MIT"
-
-
-def is_list_of_type(x: Any, target_type) -> bool:
-    """Checks if ``x`` is a list, and whether all elements of the list are of the same type.
-
-    Args:
-        x (Any): Any list-like object.
-        target_type (callable): Type to check for, e.g. ``str``, ``int``.
-
-    Returns:
-        bool: True if ``x`` is :py:class:`list` or :py:class:`tuple` and
-        all elements are of the same type.
-    """
-    return isinstance(x, (list, tuple)) and all(
-        isinstance(item, target_type) for item in x
-    )
 
 
 def _convert_1d_sparse_to_dense(x):
@@ -74,14 +56,31 @@ def _is_1d_sparse_arrays(x) -> bool:
     return all(y.shape[0] == 1 for y in x)
 
 
-def _do_arrays_match(x, dim: int):
+def _do_arrays_match(x, dim: int) -> bool:
+    """Check if all arrays match the nth dimension specified by ``dim``.
+
+    Args:
+        x: A list of arrays.
+        dim (int): Dimension to check.
+
+    Returns:
+        bool: True if all arrays match the nth dimension.
+    """
     all_shapes = [y.shape[dim] for y in x]
 
     first = all_shapes[0]
     return all(y == first for y in all_shapes)
 
 
-def _is_package_installed(package_name: str):
+def _is_package_installed(package_name: str) -> bool:
+    """Check if the package is installed.
+
+    Args:
+        package_name (str): Package name.
+
+    Returns:
+        bool: True if package is installed, otherwise False.
+    """
     _installed = False
     try:
         exec(f"import {package_name}")
@@ -90,3 +89,18 @@ def _is_package_installed(package_name: str):
         pass
 
     return _installed
+
+
+def _is_any_element_list(x, target_type) -> bool:
+    """Check if ``x`` is a list and any of the elements are of the ``target_type``.
+
+    Args:
+        x: A list of objects.
+        target_type: Target type to check
+
+    Returns:
+        bool: True if any element in x is the expected type.
+    """
+    return isinstance(x, (list, tuple)) and any(
+        isinstance(item, target_type) for item in x
+    )
