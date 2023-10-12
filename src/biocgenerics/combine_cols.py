@@ -2,13 +2,13 @@ from functools import singledispatch
 from typing import Any
 from warnings import warn
 
+from biocutils import is_list_of_type
 from numpy import hstack, ndarray
 
 from .utils import (
     _convert_sparse_to_dense,
     _do_arrays_match,
     _is_package_installed,
-    is_list_of_type,
 )
 
 __author__ = "jkanche"
@@ -121,4 +121,4 @@ if _is_package_installed("pandas") is True:
         if is_list_of_type(x, DataFrame):
             return concat(x, axis=0)
 
-        raise TypeError("All elements must be Pandas DataFrame objects.")
+        raise TypeError("All elements must be Pandas `DataFrame` objects.")

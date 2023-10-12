@@ -3,6 +3,7 @@ from itertools import chain
 from typing import Any
 from warnings import warn
 
+from biocutils import is_list_of_type
 from numpy import concatenate, ndarray
 
 from .utils import (
@@ -10,7 +11,6 @@ from .utils import (
     _is_1d_dense_arrays,
     _is_1d_sparse_arrays,
     _is_package_installed,
-    is_list_of_type,
 )
 
 __author__ = "jkanche"
@@ -20,7 +20,7 @@ __license__ = "MIT"
 
 @singledispatch
 def combine_seqs(*x: Any):
-    """combine_seqs vector-like objects (1-dimensional arrays).
+    """Combine vector-like objects (1-dimensional arrays).
 
     If all elements are :py:class:`~numpy.ndarray`,
     we combine them using numpy's :py:func:`~numpy.concatenate`.
@@ -64,7 +64,7 @@ def _generic_combine_seqs_dense_sparse(x):
 
     if _is_1d_dense_arrays(elems) is not True:
         raise ValueError(
-            "Not all elements are 1-dimensional arrays, using `combine_rows` instead."
+            "Not all elements are 1-dimensional arrays, use `combine_rows` instead."
         )
 
     return concatenate(elems)
@@ -96,7 +96,7 @@ def _combine_seqs_dense_arrays(*x: ndarray):
     if is_list_of_type(x, ndarray):
         if _is_1d_dense_arrays(x) is not True:
             raise ValueError(
-                "Not all elements are 1-dimensional arrays, using `combine_rows` instead."
+                "Not all elements are 1-dimensional arrays, use `combine_rows` instead."
             )
 
         return concatenate(x)
@@ -115,12 +115,14 @@ if _is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_seqs_sparse_arrays(*x):
+        print("here")
+        print(x)
         if is_list_of_type(x, (sp.sparray, sp.spmatrix)):
             sp_conc = sp.hstack(x)
 
             if _is_1d_sparse_arrays(x) is not True:
                 raise ValueError(
-                    "Not all elements are 1-dimensional arrays, using `combine_seqs_rows` instead."
+                    "Not all elements are 1-dimensional arrays, use `combine_rows` instead."
                 )
 
             first = x[0]
@@ -169,4 +171,4 @@ if _is_package_installed("pandas") is True:
 
             return concat(elems)
 
-        raise TypeError("All elements must be Pandas Series objects.")
+        raise TypeError("All elements must be Pandas `Series` objects.")
