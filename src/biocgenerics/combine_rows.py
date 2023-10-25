@@ -3,12 +3,12 @@ from typing import Any
 from warnings import warn
 
 from biocutils import is_list_of_type
+from biocutils.package_utils import is_package_installed
 from numpy import concatenate, ndarray
 
 from .utils import (
     _convert_sparse_to_dense,
     _do_arrays_match,
-    _is_package_installed,
 )
 
 __author__ = "jkanche"
@@ -76,44 +76,84 @@ def _combine_rows_dense_arrays(*x: ndarray):
     raise ValueError("All elements must be 2-dimensional matrices.")
 
 
-if _is_package_installed("scipy") is True:
+if is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
-    def _combine_rows_sparse_arrays(*x):
-        if is_list_of_type(x, (sp.sparray, sp.spmatrix)):
+    def _combine_rows_sparse_matrices(*x):
+        if is_list_of_type(x, sp.spmatrix):
             sp_conc = sp.vstack(x)
 
             if _do_arrays_match(x, 1) is not True:
                 raise ValueError("2nd dimension does not match across all elements.")
 
             first = x[0]
-            if isinstance(first, (sp.csr_matrix, sp.csr_array)):
+            if isinstance(first, sp.csr_matrix):
                 return sp_conc.tocsr()
-            elif isinstance(first, (sp.csc_matrix, sp.csc_array)):
+            elif isinstance(first, sp.csc_matrix):
                 return sp_conc.tocsc()
-            elif isinstance(first, (sp.bsr_matrix, sp.bsr_array)):
+            elif isinstance(first, sp.bsr_matrix):
                 return sp_conc.tobsr()
-            elif isinstance(first, (sp.coo_matrix, sp.coo_array)):
+            elif isinstance(first, sp.coo_matrix):
                 return sp_conc.tocoo()
-            elif isinstance(first, (sp.dia_matrix, sp.dia_array)):
+            elif isinstance(first, sp.dia_matrix):
                 return sp_conc.todia()
-            elif isinstance(first, (sp.lil_matrix, sp.lil_array)):
+            elif isinstance(first, sp.lil_matrix):
                 return sp_conc.tolil()
             else:
                 return sp_conc
 
-        warn("Not all elements are scipy sparse arrays.")
+        warn("Not all elements are scipy sparse matrices.")
 
-        if is_list_of_type(x, (ndarray, sp.sparray, sp.spmatrix)):
+        if is_list_of_type(x, (ndarray, sp.spmatrix)):
             return _generic_combine_rows_dense_sparse(x)
 
         raise ValueError("All elements must be 2-dimensional matrices.")
 
-    combine_rows.register(sp.sparray, _combine_rows_sparse_arrays)
-    combine_rows.register(sp.spmatrix, _combine_rows_sparse_arrays)
+    try:
+
+        def _combine_rows_sparse_arrays(*x):
+            if is_list_of_type(x, sp.sparray):
+                sp_conc = sp.vstack(x)
+
+                if _do_arrays_match(x, 1) is not True:
+                    raise ValueError(
+                        "2nd dimension does not match across all elements."
+                    )
+
+                first = x[0]
+                if isinstance(first, sp.csr_array):
+                    return sp_conc.tocsr()
+                elif isinstance(first, sp.csc_array):
+                    return sp_conc.tocsc()
+                elif isinstance(first, sp.bsr_array):
+                    return sp_conc.tobsr()
+                elif isinstance(first, sp.coo_array):
+                    return sp_conc.tocoo()
+                elif isinstance(first, sp.dia_array):
+                    return sp_conc.todia()
+                elif isinstance(first, sp.lil_array):
+                    return sp_conc.tolil()
+                else:
+                    return sp_conc
+
+            warn("Not all elements are scipy sparse arrays.")
+
+            if is_list_of_type(x, (ndarray, sp.sparray, sp.spmatrix)):
+                return _generic_combine_rows_dense_sparse(x)
+
+            raise ValueError("All elements must be 2-dimensional arrays.")
+
+        combine_rows.register(sp.sparray, _combine_rows_sparse_arrays)
+    except Exception:
+        pass
+
+    try:
+        combine_rows.register(sp.spmatrix, _combine_rows_sparse_matrices)
+    except Exception:
+        pass
 
 
-if _is_package_installed("pandas") is True:
+if is_package_installed("pandas") is True:
     from pandas import DataFrame, concat
 
     @combine_rows.register(DataFrame)

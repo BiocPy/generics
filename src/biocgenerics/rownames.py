@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import Any, List
 
-from .utils import _is_package_installed
+from biocutils.package_utils import is_package_installed
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -27,7 +27,7 @@ def rownames(x) -> List[str]:
     raise NotImplementedError(f"`rownames` do not exist for class: '{type(x)}'.")
 
 
-if _is_package_installed("pandas") is True:
+if is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @rownames.register(DataFrame)
@@ -52,7 +52,7 @@ def set_rownames(x: Any, names: List[str]):
     raise NotImplementedError(f"Cannot set `rownames` for class: {type(x)}")
 
 
-if _is_package_installed("pandas") is True:
+if is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @set_rownames.register(DataFrame)

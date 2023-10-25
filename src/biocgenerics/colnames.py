@@ -1,7 +1,7 @@
 from functools import singledispatch
 from typing import List
 
-from .utils import _is_package_installed
+from biocutils.package_utils import is_package_installed
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -27,7 +27,7 @@ def colnames(x) -> list:
     raise NotImplementedError(f"`colnames` is not supported for class: '{type(x)}'.")
 
 
-if _is_package_installed("pandas") is True:
+if is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @colnames.register(DataFrame)
@@ -54,7 +54,7 @@ def set_colnames(x, names: List[str]):
     )
 
 
-if _is_package_installed("pandas") is True:
+if is_package_installed("pandas") is True:
     from pandas import DataFrame
 
     @set_colnames.register(DataFrame)
