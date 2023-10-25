@@ -108,7 +108,7 @@ if is_package_installed("scipy") is True:
             return _generic_combine_rows_dense_sparse(x)
 
         raise ValueError("All elements must be 2-dimensional matrices.")
-    
+
     try:
         combine_rows.register(sp.sparray, _combine_rows_sparse_arrays)
     except Exception:

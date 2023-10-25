@@ -71,7 +71,6 @@ if is_package_installed("scipy") is True:
         pass
 
 
-
 if is_package_installed("pandas") is True:
     from pandas import DataFrame, Series
 
