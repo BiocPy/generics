@@ -2,6 +2,7 @@ from functools import singledispatch
 from typing import Any
 
 from numpy import ndarray
+from biocutils.package_utils import is_package_installed
 
 from .combine_rows import combine_rows
 from .combine_seqs import combine_seqs
@@ -9,7 +10,6 @@ from .utils import (
     _is_1d_dense_arrays,
     _is_1d_sparse_arrays,
     _is_any_element_list,
-    _is_package_installed,
 )
 
 __author__ = "jkanche"
@@ -48,7 +48,7 @@ def _combine_dense_arrays(*x: ndarray):
     return combine_rows(*x)
 
 
-if _is_package_installed("scipy") is True:
+if is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_sparse(*x):
@@ -60,11 +60,19 @@ if _is_package_installed("scipy") is True:
 
         return combine_rows(*x)
 
-    combine.register(sp.sparray, _combine_sparse)
-    combine.register(sp.spmatrix, _combine_sparse)
+    try:
+        combine.register(sp.sparray, _combine_sparse)
+    except Exception:
+        pass
+
+    try:
+        combine.register(sp.spmatrix, _combine_sparse)
+    except Exception:
+        pass
 
 
-if _is_package_installed("pandas") is True:
+
+if is_package_installed("pandas") is True:
     from pandas import DataFrame, Series
 
     @combine.register(Series)

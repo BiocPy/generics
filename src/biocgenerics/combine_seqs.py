@@ -5,12 +5,12 @@ from warnings import warn
 
 from biocutils import is_list_of_type
 from numpy import concatenate, ndarray
+from biocutils.package_utils import is_package_installed
 
 from .utils import (
     _convert_1d_sparse_to_dense,
     _is_1d_dense_arrays,
     _is_1d_sparse_arrays,
-    _is_package_installed,
 )
 
 __author__ = "jkanche"
@@ -111,7 +111,7 @@ def _combine_seqs_dense_arrays(*x: ndarray):
     return _generic_coerce_list(x)
 
 
-if _is_package_installed("scipy") is True:
+if is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_seqs_sparse_arrays(*x):
@@ -148,11 +148,18 @@ if _is_package_installed("scipy") is True:
 
         return _generic_coerce_list(x)
 
-    combine_seqs.register(sp.sparray, _combine_seqs_sparse_arrays)
-    combine_seqs.register(sp.spmatrix, _combine_seqs_sparse_arrays)
+    try:
+        combine_seqs.register(sp.sparray, _combine_seqs_sparse_arrays)
+    except Exception:
+        pass
+
+    try:
+        combine_seqs.register(sp.spmatrix, _combine_seqs_sparse_arrays)
+    except Exception:
+        pass
 
 
-if _is_package_installed("pandas") is True:
+if is_package_installed("pandas") is True:
     from pandas import Series, concat
 
     @combine_seqs.register(Series)

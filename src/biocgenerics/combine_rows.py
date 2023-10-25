@@ -4,11 +4,11 @@ from warnings import warn
 
 from biocutils import is_list_of_type
 from numpy import concatenate, ndarray
+from biocutils.package_utils import is_package_installed
 
 from .utils import (
     _convert_sparse_to_dense,
     _do_arrays_match,
-    _is_package_installed,
 )
 
 __author__ = "jkanche"
@@ -76,7 +76,7 @@ def _combine_rows_dense_arrays(*x: ndarray):
     raise ValueError("All elements must be 2-dimensional matrices.")
 
 
-if _is_package_installed("scipy") is True:
+if is_package_installed("scipy") is True:
     import scipy.sparse as sp
 
     def _combine_rows_sparse_arrays(*x):
@@ -108,12 +108,19 @@ if _is_package_installed("scipy") is True:
             return _generic_combine_rows_dense_sparse(x)
 
         raise ValueError("All elements must be 2-dimensional matrices.")
+    
+    try:
+        combine_rows.register(sp.sparray, _combine_rows_sparse_arrays)
+    except Exception:
+        pass
 
-    combine_rows.register(sp.sparray, _combine_rows_sparse_arrays)
-    combine_rows.register(sp.spmatrix, _combine_rows_sparse_arrays)
+    try:
+        combine_rows.register(sp.spmatrix, _combine_rows_sparse_arrays)
+    except Exception:
+        pass
 
 
-if _is_package_installed("pandas") is True:
+if is_package_installed("pandas") is True:
     from pandas import DataFrame, concat
 
     @combine_rows.register(DataFrame)

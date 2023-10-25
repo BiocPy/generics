@@ -72,25 +72,6 @@ def _do_arrays_match(x, dim: int) -> bool:
     return all(y == first for y in all_shapes)
 
 
-def _is_package_installed(package_name: str) -> bool:
-    """Check if the package is installed.
-
-    Args:
-        package_name (str): Package name.
-
-    Returns:
-        bool: True if package is installed, otherwise False.
-    """
-    _installed = False
-    try:
-        exec(f"import {package_name}")
-        _installed = True
-    except Exception:
-        pass
-
-    return _installed
-
-
 def _is_any_element_list(x, target_type) -> bool:
     """Check if ``x`` is a list and any of the elements are of the ``target_type``.
 
