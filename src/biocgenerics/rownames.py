@@ -3,7 +3,6 @@ from typing import Any, List
 
 from biocutils.package_utils import is_package_installed
 
-
 __author__ = "jkanche"
 __copyright__ = "jkanche"
 __license__ = "MIT"

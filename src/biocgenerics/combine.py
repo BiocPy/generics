@@ -1,8 +1,8 @@
 from functools import singledispatch
 from typing import Any
 
-from numpy import ndarray
 from biocutils.package_utils import is_package_installed
+from numpy import ndarray
 
 from .combine_rows import combine_rows
 from .combine_seqs import combine_seqs
