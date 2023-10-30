@@ -4,7 +4,7 @@ from functools import singledispatch
 
 @singledispatch
 def show_as_cell(x: Any, indices: Sequence[int]) -> List[str]:
-    """Show the contents of ``x`` as a cell of a table, typically for use in the ``__repr__`` method of a class that
+    """Show the contents of ``x`` as a cell of a table, typically for use in the ``__str__`` method of a class that
     contains ``x``.
 
     Args:
@@ -21,7 +21,7 @@ def show_as_cell(x: Any, indices: Sequence[int]) -> List[str]:
     """
     output = []
     for i in indices:
-        output.append(repr(x[i]))
+        output.append(str(x[i]))
     return output
 
 
