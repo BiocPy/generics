@@ -109,6 +109,5 @@ def format_table(
         used += width + len(sep)
         init = False
 
-    for line in contents:
-        output += line + "\n"
+    output += "\n".join(contents)
     return output
