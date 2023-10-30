@@ -20,3 +20,4 @@ from .combine_seqs import combine_seqs
 from .combine_cols import combine_cols
 from .combine_rows import combine_rows
 from .rownames import rownames, set_rownames
+from .show_as_cell import show_as_cell, format_table
