@@ -5,6 +5,7 @@ __author__ = "Aaron Lun"
 __copyright__ = "LTLA"
 __license__ = "MIT"
 
+
 @singledispatch
 def show_as_cell(x: Any, indices: Sequence[int]) -> List[str]:
     """Show the contents of ``x`` as a cell of a table, typically for use in the ``__str__`` method of a class that
