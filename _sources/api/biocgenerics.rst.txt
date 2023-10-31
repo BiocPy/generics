@@ -52,6 +52,14 @@ biocgenerics.rownames module
    :undoc-members:
    :show-inheritance:
 
+biocgenerics.show\_as\_cell module
+----------------------------------
+
+.. automodule:: biocgenerics.show_as_cell
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 biocgenerics.utils module
 -------------------------
 
